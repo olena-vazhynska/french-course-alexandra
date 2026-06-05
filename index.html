@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Le Français en Voyage</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f8fafc;font-family:'Segoe UI',sans-serif}
+.screen{display:none;max-width:700px;margin:0 auto;padding:24px 16px}
+.active{display:block}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.pbar{background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;margin:8px 0}
+.pfill{height:100%;border-radius:99px;background:linear-gradient(90deg,#6366f1,#a855f7);transition:width .4s}
+.mcard{border-radius:16px;padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:16px;margin-bottom:14px;border:2px solid rgba(0,0,0,.06);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.lcard{background:#fff;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:12px;border:2px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.opt{border:2px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer;background:#f1f5f9;font-size:15px;transition:all .15s}
+.chip{border:2px solid #e2e8f0;border-radius:99px;padding:6px 14px;margin:4px;cursor:pointer;background:#f1f5f9;font-size:14px;font-weight:600;display:inline-block;transition:all .15s}
+.blank{border:2px solid #e2e8f0;border-radius:8px;padding:2px 12px;font-weight:700;display:inline-block;min-width:70px;text-align:center;background:#f1f5f9}
+.hint{background:#fef3c7;border:1.5px solid #fbbf24;border-radius:12px;padding:12px 16px;font-size:14px;color:#92400e;margin-bottom:16px}
+.ok{background:#dcfce7;border-radius:12px;padding:14px;font-weight:700;color:#166534;margin-top:12px}
+.no{background:#fef3c7;border-radius:12px;padding:14px;font-weight:700;color:#92400e;margin-top:12px}
+.btn{border:none;border-radius:99px;padding:12px 28px;font-weight:700;font-size:15px;cursor:pointer;margin-top:14px}
+.btn:disabled{background:#e2e8f0!important;color:#94a3b8!important;cursor:not-allowed}
+.bubble{border-radius:14px;padding:10px 14px;max-width:80%;font-size:15px}
+.row{display:flex;gap:10px;margin-bottom:12px}
+.rowR{flex-direction:row-reverse}
+.vrow{display:flex;gap:8px;background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:6px}
+textarea{width:100%;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;outline:none;line-height:1.7;border:2px solid #ccc;box-sizing:border-box}
+</style>
+</head>
+<body>
+
+<div id="sHome" class="screen active">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:48px">🇫🇷</div>
+    <h1 style="font-size:24px;font-weight:800;color:#1e293b;margin:8px 0 4px">Le Français en Voyage 🌍</h1>
+    <p style="color:#64748b">Parcours interactif B1 pour Alexandra</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="font-weight:700;color:#1e293b">Progression</span>
+      <span id="hXP" style="color:#6366f1;font-weight:700">0 XP</span>
+    </div>
+    <div class="pbar"><div id="hBar" class="pfill" style="width:0"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#94a3b8">
+      <span id="hCount">0/13 leçons</span><span id="hPct">0%</span>
+    </div>
+  </div>
+  <div id="hBadges"></div>
+  <div id="hMods"></div>
+  <p style="text-align:center;color:#94a3b8;font-size:13px;margin-top:20px">⏱ 4 heures · B1 · 🇷🇺 disponible</p>
+</div>
+
+<div id="sMod" class="screen">
+  <button onclick="go('sHome')" id="bkMod" style="background:none;border:none;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:16px">← Retour</button>
+  <div id="modHdr" class="card"></div>
+  <div id="modList"></div>
+</div>
+
+<div id="sLesson" class="screen">
+  <div style="display:flex;align-items:center;margin-bottom:20px">
+    <button onclick="go('sMod')" id="bkLes" style="background:none;border:none;font-weight:700;font-size:15px;cursor:pointer">← Module</button>
+    <div style="flex:1"></div>
+    <button id="hintBtn" onclick="toggleHint()" style="border:none;border-radius:99px;padding:6px 14px;font-weight:600;font-size:13px;cursor:pointer;background:#f1f5f9;color:#92400e">🇷🇺 Подсказка</button>
+  </div>
+  <div id="hintBox" class="hint" style="display:none"></div>
+  <div id="lesBox" class="card"></div>
+</div>
+
+<div id="sDone" class="screen" style="text-align:center;padding-top:40px">
+  <div style="font-size:60px">🎉</div>
+  <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin:12px 0 6px">Module complété !</h2>
+  <p id="doneText" style="color:#64748b;font-size:16px"></p>
+  <div id="doneCard" class="card" style="margin:20px 0;text-align:center"></div>
+  <div id="doneBadges" style="margin-bottom:16px"></div>
+  <button onclick="go('sHome')" id="doneBtn" class="btn" style="color:#fff;font-size:16px">Retour au menu →</button>
+</div>
+
+<script>
+var DATA=[
+ {id:0,icon:"🗼",city:"Paris, France",title:"À Paris",c:"#6366f1",bg:"#eef2ff",lessons:[
+  {id:"0-0",type:"dlg",title:"À l'hôtel",xp:30,hint:"Диалог в отеле — практикуй вежливые формы обращения!",
+   lines:[{s:"Réceptionniste",t:"Bonjour ! Vous avez une réservation ?"},{s:"Alexandra",t:"Oui, j'ai réservé une chambre pour trois nuits au nom d'Ivanova."},{s:"Réceptionniste",t:"Parfait ! Chambre 214, au deuxième étage. Voici votre clé."},{s:"Alexandra",t:"Merci. Est-ce que le petit-déjeuner est inclus ?"},{s:"Réceptionniste",t:"Oui, il est servi de 7h à 10h au restaurant."}],
+   vocab:[{f:"une réservation",r:"бронирование"},{f:"au nom de",r:"на имя"},{f:"le deuxième étage",r:"второй этаж"},{f:"le petit-déjeuner",r:"завтрак"},{f:"est inclus",r:"включён"}]},
+  {id:"0-1",type:"qcm",title:"Quiz — L'hôtel",xp:40,hint:"Вопросы по диалогу — выбери правильный ответ!",
+   qs:[{q:"Pour combien de nuits Alexandra a-t-elle réservé ?",o:["Deux nuits","Trois nuits","Une semaine","Quatre nuits"],a:1},{q:"À quel étage est la chambre ?",o:["Premier","Troisième","Deuxième","Rez-de-chaussée"],a:2},{q:"Jusqu'à quelle heure est servi le petit-déjeuner ?",o:["9h","11h","10h","8h"],a:2}]},
+  {id:"0-2",type:"fill",title:"Grammaire — Le subjonctif",xp:50,hint:"Сюбжонктив — после глаголов желания и эмоций: vouloir que, il faut que, être content que...",
+   expl:"Le subjonctif s'utilise après : vouloir que, il faut que, être content(e) que...",
+   ss:[{b:"Il faut que tu ",blank:"sois",a:" à l'heure.",o:["es","sois","être","soit"]},{b:"Je suis contente que vous ",blank:"puissiez",a:" nous rejoindre.",o:["pouvez","pouvoir","puissiez","puissent"]},{b:"Il vaut mieux que nous ",blank:"prenions",a:" le métro.",o:["prenons","prendrons","prenions","prendre"]}]},
+  {id:"0-3",type:"scen",title:"Scénario — Au Louvre",xp:60,hint:"Ролевой сценарий — выбери подходящую реплику!",
+   setup:"Tu es devant la pyramide du Louvre. Un touriste t'aborde.",
+   ex:[{s:"Touriste",t:"Excusez-moi, savez-vous où se trouve la Joconde ?",o:["Je ne sais pas parler.","Oui, elle est dans la salle Denon, au premier étage !","Non, je veux partir."],c:1,f:["Trop abrupte 😅","Parfait ! 🎉","Pas très aimable..."]},{s:"Touriste",t:"Merci ! Vous visitez aussi le musée ?",o:["Oui, je prévois de voir les antiquités grecques.","Non, je suis pressée.","Peut-être demain ou jamais."],c:0,f:["Excellent ! 👏","Correct mais sec !","Pas très communicatif..."]}]}
+ ]},
+ {id:1,icon:"🇨🇭",city:"Genève, Suisse",title:"À Genève",c:"#0891b2",bg:"#ecfeff",lessons:[
+  {id:"1-0",type:"read",title:"La santé en Suisse",xp:40,hint:"Чтение о швейцарской системе здравоохранения — читай внимательно!",
+   text:"En Suisse, tout résident est obligé de souscrire une assurance maladie de base, appelée LAMal. Cette assurance couvre les soins médicaux essentiels : consultations, hospitalisations, et médicaments sur ordonnance.\n\nChaque assuré choisit son médecin de famille. Pour consulter un spécialiste, il faut une référence de ce médecin.\n\nGenève attire des professionnels du monde entier — comme Alexandra !",
+   qs:[{q:"Qu'est-ce que la LAMal ?",o:["Une banque suisse","L'assurance maladie obligatoire","Un hôpital genevois","Une carte de transport"],a:1},{q:"Que faut-il pour consulter un spécialiste ?",o:["Payer en avance","Parler allemand","Une référence du médecin traitant","Un passeport européen"],a:2}]},
+  {id:"1-1",type:"writ",title:"Email professionnel",xp:70,hint:"'Je me permets de vous contacter' = Позвольте обратиться. 'Veuillez agréer mes salutations distinguées' = С уважением.",
+   prompt:"Rédige un email à ton médecin genevois pour prendre rendez-vous. Inclus ton nom, le motif, tes disponibilités et une formule de politesse.",
+   start:"Madame, Monsieur,\n\nJe me permets de vous contacter afin de...",
+   tips:["Commence par 'Je me permets de...'","Propose deux créneaux disponibles","Termine par 'Veuillez agréer mes salutations distinguées.'"]},
+  {id:"1-2",type:"qcm",title:"Quiz — Vocabulaire médical",xp:40,hint:"Медицинская лексика — пригодится везде!",
+   qs:[{q:"Comment dit-on 'ordonnance' ?",o:["ordination","prescription","ordonnance","réservation"],a:2},{q:"Que veut dire 'avoir de la fièvre' ?",o:["avoir faim","avoir chaud","avoir une température élevée","avoir mal au dos"],a:2},{q:"Synonyme de 'médecin' ?",o:["infirmier","docteur","pharmacien","dentiste"],a:1},{q:"Qu'est-ce qu'une 'franchise' médicale ?",o:["Une clinique gratuite","Le montant à payer avant remboursement","Un médicament","Un remboursement immédiat"],a:1}]}
+ ]},
+ {id:2,icon:"🍫",city:"Bruxelles, Belgique",title:"À Bruxelles",c:"#d97706",bg:"#fffbeb",lessons:[
+  {id:"2-0",type:"dlg",title:"Au marché",xp:30,hint:"Разговор на рынке — числа и количества!",
+   lines:[{s:"Vendeur",t:"Bonjour ! Qu'est-ce qu'il vous faut ?"},{s:"Alexandra",t:"Bonjour ! Je voudrais un kilo de tomates et une botte de persil, s'il vous plaît."},{s:"Vendeur",t:"Voilà ! Et avec ça ?"},{s:"Alexandra",t:"C'est combien pour les fraises ? Elles ont l'air délicieuses !"},{s:"Vendeur",t:"Trois euros la barquette. Si vous en prenez deux, je vous fais un prix !"},{s:"Alexandra",t:"D'accord, je prends deux barquettes. Merci !"}],
+   vocab:[{f:"une botte de persil",r:"пучок петрушки"},{f:"une barquette",r:"лоток/упаковка"},{f:"avoir l'air",r:"выглядеть"},{f:"je vous fais un prix",r:"сделаю скидку"},{f:"Et avec ça ?",r:"Что-нибудь ещё?"}]},
+  {id:"2-1",type:"fill",title:"Grammaire — Le conditionnel",xp:50,hint:"Кондиционал: инфинитив + -ais/-ait/-ions/-iez/-aient. Используется для вежливости и гипотез.",
+   expl:"Le conditionnel exprime la politesse ou une hypothèse. 'Je voudrais' est plus poli que 'Je veux'.",
+   ss:[{b:"Est-ce que vous ",blank:"pourriez",a:" m'indiquer la rue du Marché ?",o:["pouvez","pourriez","pouviez","puissiez"]},{b:"J'",blank:"aimerais",a:" goûter les gaufres belges.",o:["aime","aimais","aimerais","aimerai"]},{b:"Si j'avais le temps, je ",blank:"visiterais",a:" le Manneken Pis.",o:["visite","visitais","visiterai","visiterais"]}]},
+  {id:"2-2",type:"scen",title:"Scénario — Au restaurant",xp:60,hint:"Заказ в ресторане — используй кондиционал для вежливости!",
+   setup:"Tu es dans une brasserie bruxelloise. Le serveur s'approche.",
+   ex:[{s:"Serveur",t:"Bonsoir ! Vous avez choisi ?",o:["Oui, donnez-moi des moules.","Je voudrais les moules-frites, s'il vous plaît.","Je veux manger maintenant."],c:1,f:["Trop direct !","Parfait ! 🍟🦪","Trop brusque !"]},{s:"Serveur",t:"Et comme boisson ?",o:["De l'eau gazeuse, s'il vous plaît.","De l'eau.","Rien."],c:0,f:["Excellent ! 👏","Correct mais incomplet !","C'est un peu sec..."]}]}
+ ]},
+ {id:3,icon:"🌴",city:"Martinique",title:"En Martinique",c:"#16a34a",bg:"#f0fdf4",lessons:[
+  {id:"3-0",type:"read",title:"La culture créole",xp:40,hint:"Чтение о Мартинике — угадывай незнакомые слова из контекста!",
+   text:"La Martinique est un département français d'outre-mer situé dans les Caraïbes. On y parle français, mais aussi le créole martiniquais.\n\nLa culture martiniquaise est riche et colorée. Le zouk, né aux Antilles, est un genre musical incontournable. Le plat traditionnel est le colombo, un curry antillais parfumé.\n\nLes Martiniquais sont réputés pour leur chaleur humaine. N'oublie pas de goûter les accras de morue !",
+   qs:[{q:"Quelles langues parle-t-on en Martinique ?",o:["Français seulement","Créole seulement","Français et créole","Espagnol et français"],a:2},{q:"Qu'est-ce que le colombo ?",o:["Une danse antillaise","Un curry antillais","Un fruit tropical","Un instrument de musique"],a:1}]},
+  {id:"3-1",type:"qcm",title:"Quiz final — Bilan",xp:80,hint:"Финальный тест по всему курсу — ты почти у цели! 🎉",
+   qs:[{q:"Subjonctif de 'être' à la 2e personne ?",o:["es","seras","sois","étais"],a:2},{q:"Comment commander poliment ?",o:["Je veux une table","Donnez-moi une table","Je voudrais une table, s'il vous plaît","Une table !"],a:2},{q:"Que signifie la LAMal ?",o:["Un train suisse","L'assurance maladie obligatoire","Un musée","Un parti politique"],a:1},{q:"'Et avec ça ?' signifie ?",o:["C'est tout ?","Vous voulez autre chose ?","Quoi d'autre ?","Toutes ces réponses"],a:3},{q:"Genre musical né aux Antilles ?",o:["Reggae","Salsa","Zouk","Bossa nova"],a:2}]},
+  {id:"3-2",type:"writ",title:"Carte postale de Martinique",xp:80,hint:"Passé composé: avoir/être + participe. 'J'ai mangé' (я съела), 'Je suis allée' (я пошла — с être!).",
+   prompt:"Écris une carte postale depuis la Martinique (80-100 mots). Décris le temps, ce que tu as vu, mangé, et ce que tu vas faire demain.",
+   start:"Chère/Cher ...,\n\nMe voilà en Martinique ! Le soleil...",
+   tips:["Utilise le passé composé : 'J'ai visité...', 'Nous avons mangé...'","Adjectifs : magnifique, coloré, épicé, chaleureux","Pour demain : 'Je vais aller à la plage / goûter les accras'"]}
+ ]}
+];
+
+var BADGES=[
+ {id:"b1",icon:"👣",label:"Premier Pas",ok:function(x){return x>=30;}},
+ {id:"b2",icon:"⭐",label:"Mi-Parcours",ok:function(x){return x>=200;}},
+ {id:"b3",icon:"📚",label:"Grammairienne",ok:function(x,d){return d.some(function(id){return id.indexOf("fill")>=0;});}},
+ {id:"b4",icon:"✍️",label:"Plume d'or",ok:function(x,d){return d.some(function(id){return id.indexOf("writ")>=0||id==="1-1"||id==="3-2";});}},
+ {id:"b5",icon:"🏆",label:"Championne B1",ok:function(x){return x>=600;}}
+];
+
+var MAX_XP=DATA.reduce(function(s,m){return s+m.lessons.reduce(function(ss,l){return ss+l.xp;},0);},0);
+var TOTAL=DATA.reduce(function(s,m){return s+m.lessons.length;},0);
+
+var ST={xp:0,done:[],mi:0,li:0,hint:false,showV:false,qAns:{},qSub:false,fAns:{},fSub:false,step:0,choices:{},rAns:{},rSub:false,wSub:false};
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  if(id==='sHome') renderHome();
+}
+
+function ti(t){return{dlg:"💬",qcm:"❓",fill:"📝",scen:"🎭",read:"📖",writ:"✍️"}[t]||"📋";}
+
+function renderHome(){
+  var pct=Math.round(ST.done.length/TOTAL*100);
+  document.getElementById('hXP').textContent=ST.xp+' XP';
+  document.getElementById('hBar').style.width=pct+'%';
+  document.getElementById('hCount').textContent=ST.done.length+'/'+TOTAL+' leçons';
+  document.getElementById('hPct').textContent=pct+'%';
+  var earned=BADGES.filter(function(b){return b.ok(ST.xp,ST.done);});
+  var bb=document.getElementById('hBadges');
+  if(earned.length){
+    bb.innerHTML='<div class="card"><div style="font-weight:700;color:#1e293b;margin-bottom:10px">🏅 Badges obtenus</div><div>'+
+      earned.map(function(b){return '<span style="display:inline-block;text-align:center;background:#faf5ff;border:2px solid #a855f7;border-radius:12px;padding:8px 14px;margin:4px"><div style="font-size:22px">'+b.icon+'</div><div style="font-size:11px;font-weight:600;color:#7c3aed">'+b.label+'</div></span>';}).join('')+
+    '</div></div>';
+  } else bb.innerHTML='';
+  document.getElementById('hMods').innerHTML=DATA.map(function(m,i){
+    var d=m.lessons.filter(function(l){return ST.done.indexOf(l.id)>=0;}).length;
+    var p=Math.round(d/m.lessons.length*100);
+    return '<div class="mcard" style="background:'+m.bg+';border-color:'+m.c+'30" onclick="openMod('+i+')">'+
+      '<div style="font-size:36px">'+m.icon+'</div>'+
+      '<div style="flex:1"><div style="font-weight:700;color:#1e293b;font-size:16px">'+m.title+'</div>'+
+      '<div style="color:#64748b;font-size:13px">'+m.city+' · '+m.lessons.length+' leçons</div>'+
+      '<div class="pbar" style="height:6px;margin-top:8px"><div style="width:'+p+'%;background:'+m.c+';height:100%;border-radius:99px"></div></div></div>'+
+      '<div style="color:'+m.c+';font-weight:800;font-size:18px">'+d+'/'+m.lessons.length+'</div></div>';
+  }).join('');
+}
+
+function openMod(i){
+  ST.mi=i;
+  var m=DATA[i];
+  document.getElementById('bkMod').style.color=m.c;
+  document.getElementById('modHdr').style.background=m.bg;
+  document.getElementById('modHdr').style.border='2px solid '+m.c+'30';
+  document.getElementById('modHdr').innerHTML='<div style="font-size:40px;margin-bottom:8px">'+m.icon+'</div><h2 style="font-size:20px;font-weight:800;color:#1e293b">'+m.title+'</h2><div style="color:#64748b;font-size:14px">'+m.city+'</div>';
+  document.getElementById('modList').innerHTML=m.lessons.map(function(l,j){
+    var d=ST.done.indexOf(l.id)>=0;
+    return '<div class="lcard" style="border-color:'+(d?m.c:'#e2e8f0')+'" onclick="openLesson('+j+')">'+
+      '<div style="font-size:24px">'+(d?'✅':ti(l.type))+'</div>'+
+      '<div style="flex:1"><div style="font-weight:700;color:#1e293b">'+l.title+'</div>'+
+      '<div style="color:#94a3b8;font-size:13px">'+l.type+' · '+l.xp+' XP</div></div>'+
+      (d?'<span style="color:'+m.c+';font-weight:800">✓</span>':'')+
+    '</div>';
+  }).join('');
+  go('sMod');
+}
+
+function openLesson(j){
+  ST.li=j; ST.hint=false; ST.showV=false;
+  ST.qAns={}; ST.qSub=false;
+  ST.fAns={}; ST.fSub=false;
+  ST.step=0; ST.choices={};
+  ST.rAns={}; ST.rSub=false;
+  ST.wSub=false;
+  document.getElementById('hintBox').style.display='none';
+  document.getElementById('hintBtn').textContent='🇷🇺 Подсказка';
+  document.getElementById('hintBtn').style.background='#f1f5f9';
+  renderLesson();
+  go('sLesson');
+}
+
+function toggleHint(){
+  ST.hint=!ST.hint;
+  var l=DATA[ST.mi].lessons[ST.li];
+  var hb=document.getElementById('hintBox');
+  var hbtn=document.getElementById('hintBtn');
+  if(ST.hint){hb.innerHTML='💡 '+l.hint;hb.style.display='block';hbtn.textContent='🇷🇺 Скрыть';hbtn.style.background='#fef3c7';}
+  else{hb.style.display='none';hbtn.textContent='🇷🇺 Подсказка';hbtn.style.background='#f1f5f9';}
+}
+
+function renderLesson(){
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li];
+  document.getElementById('bkLes').style.color=m.c;
+  var box=document.getElementById('lesBox');
+  box.innerHTML='<div style="display:flex;gap:10px;align-items:center;margin-bottom:18px"><span style="font-size:26px">'+ti(l.type)+'</span><div><h2 style="font-size:17px;font-weight:800;color:#1e293b">'+l.title+'</h2><span style="color:'+m.c+';font-weight:700;font-size:13px">'+l.xp+' XP</span></div></div><div id="lb"></div>';
+  var f={dlg:renderDlg,qcm:renderQcm,fill:renderFill,scen:renderScen,read:renderRead,writ:renderWrit};
+  if(f[l.type]) f[l.type](l,m);
+}
+
+function doneBtn(lid,xp,c){
+  var ad=ST.done.indexOf(lid)>=0;
+  return '<button class="btn" '+(ad?'disabled':'')+' style="background:'+(ad?'#e2e8f0':c)+';color:'+(ad?'#94a3b8':'#fff')+'" onclick="complete(\''+lid+'\','+xp+')">'+(ad?'✓ Complété':'Continuer →')+'</button>';
+}
+
+function renderDlg(l,m){
+  var h='<div style="margin-bottom:16px">'+
+    l.lines.map(function(ln){
+      var isA=ln.s==='Alexandra';
+      return '<div class="row '+(isA?'rowR':'')+'"><div style="font-size:20px">'+(isA?'👩':'🧑‍💼')+'</div>'+
+        '<div class="bubble" style="background:'+(isA?m.bg:'#f1f5f9')+';border:1.5px solid '+(isA?m.c+'40':'#e2e8f0')+'">'+
+        '<div style="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:4px">'+ln.s+'</div>'+
+        '<div>'+ln.t+'</div></div></div>';
+    }).join('')+'</div>'+
+    '<button onclick="toggleV()" style="background:#f1f5f9;border:none;border-radius:99px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#475569" id="vBtn">▼ Voir le vocabulaire</button>'+
+    '<div id="vList" style="display:none;margin-top:10px">'+
+      l.vocab.map(function(v){return '<div class="vrow"><span style="font-weight:700;color:'+m.c+'">'+v.f+'</span><span style="color:#64748b"> — </span><span style="color:#475569">'+v.r+'</span></div>';}).join('')+
+    '</div><div>'+doneBtn(l.id,l.xp,m.c)+'</div>';
+  document.getElementById('lb').innerHTML=h;
+}
+
+function toggleV(){
+  ST.showV=!ST.showV;
+  var v=document.getElementById('vList');var b=document.getElementById('vBtn');
+  v.style.display=ST.showV?'block':'none';
+  b.textContent=ST.showV?'▲ Masquer le vocabulaire':'▼ Voir le vocabulaire';
+}
+
+function renderQcm(l,m){
+  document.getElementById('lb').innerHTML=
+    l.qs.map(function(q,qi){
+      return '<div style="margin-bottom:20px"><div style="font-weight:700;color:#1e293b;margin-bottom:10px">'+(qi+1)+'. '+q.q+'</div>'+
+        q.o.map(function(opt,oi){return '<div class="opt" id="o'+qi+'_'+oi+'" onclick="pickQ('+qi+','+oi+','+q.a+')">'+opt+'</div>';}).join('')+'</div>';
+    }).join('')+
+    '<div id="qRes"></div>'+
+    '<button id="qBtn" class="btn" disabled style="background:#e2e8f0;color:#94a3b8" onclick="subQ()">Vérifier les réponses</button>';
+}
+
+function pickQ(qi,oi,ans){
+  if(ST.qSub) return;
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li];
+  var prev=ST.qAns[qi];
+  if(prev!==undefined) styleOpt('o'+qi+'_'+prev,'#f1f5f9','#e2e8f0','#1e293b',false);
+  ST.qAns[qi]=oi;
+  styleOpt('o'+qi+'_'+oi,m.bg,m.c,m.c,true);
+  if(Object.keys(ST.qAns).length===l.qs.length){
+    var b=document.getElementById('qBtn');b.removeAttribute('disabled');b.style.background=m.c;b.style.color='#fff';
+  }
+}
+
+function subQ(){
+  if(ST.qSub) return; ST.qSub=true;
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li]; var score=0;
+  l.qs.forEach(function(q,qi){
+    q.o.forEach(function(_,oi){
+      var el=document.getElementById('o'+qi+'_'+oi);
+      if(el) el.onclick=null;
+      if(oi===q.a){styleOpt('o'+qi+'_'+oi,'#dcfce7','#16a34a','#166534',true);}
+      else if(ST.qAns[qi]===oi){styleOpt('o'+qi+'_'+oi,'#fee2e2','#dc2626','#7f1d1d',false);}
+      else styleOpt('o'+qi+'_'+oi,'#f1f5f9','#e2e8f0','#1e293b',false);
+    });
+    if(ST.qAns[qi]===q.a) score++;
+  });
+  document.getElementById('qRes').innerHTML='<div class="'+(score===l.qs.length?'ok':'no')+'">'+(score===l.qs.length?'🎉 Parfait ! Toutes les réponses sont correctes !':'✅ '+score+'/'+l.qs.length+' — Regarde les réponses en vert.')+'</div>';
+  var b=document.getElementById('qBtn'); b.innerHTML=doneBtn(l.id,l.xp,m.c); b.outerHTML=b.outerHTML;
+  document.getElementById('lb').innerHTML+=doneBtn(l.id,l.xp,m.c);
+  document.getElementById('qBtn').remove();
+}
+
+function styleOpt(id,bg,br,col,bold){
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.style.background=bg; el.style.borderColor=br; el.style.color=col; el.style.fontWeight=bold?'700':'400';
+}
+
+function renderFill(l,m){
+  document.getElementById('lb').innerHTML=
+    '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#166534">📖 '+l.expl+'</div>'+
+    l.ss.map(function(s,i){
+      return '<div style="margin-bottom:18px">'+
+        '<div style="font-size:15px;color:#1e293b;line-height:1.9;margin-bottom:8px">'+s.b+'<span class="blank" id="bl'+i+'" style="color:'+m.c+'">___</span>'+s.a+'</div>'+
+        '<div id="corr'+i+'" style="display:none;font-size:13px;color:#16a34a;margin-bottom:6px">✓ Réponse : <strong>'+s.blank+'</strong></div>'+
+        '<div>'+s.o.map(function(opt){return '<span class="chip" id="fc'+i+'_'+opt+'" onclick="pickF('+i+',\''+opt+'\',\''+s.blank+'\')">'+opt+'</span>';}).join('')+'</div>'+
+      '</div>';
+    }).join('')+
+    '<div id="fRes"></div>'+
+    '<button id="fBtn" class="btn" disabled style="background:#e2e8f0;color:#94a3b8" onclick="subF()">Vérifier</button>';
+}
+
+function pickF(i,opt,blank){
+  if(ST.fSub) return;
+  var m=DATA[ST.mi];
+  var prev=ST.fAns[i];
+  if(prev!==undefined){
+    var pe=document.getElementById('fc'+i+'_'+prev);
+    if(pe){pe.style.background='#f1f5f9';pe.style.borderColor='#e2e8f0';pe.style.color='#475569';}
+  }
+  ST.fAns[i]=opt;
+  var el=document.getElementById('fc'+i+'_'+opt);
+  if(el){el.style.background=m.bg;el.style.borderColor=m.c;el.style.color=m.c;}
+  var bl=document.getElementById('bl'+i);
+  if(bl){bl.textContent=opt;bl.style.background=m.bg;bl.style.borderColor=m.c;}
+  var l=m.lessons[ST.li];
+  if(Object.keys(ST.fAns).length===l.ss.length){
+    var b=document.getElementById('fBtn');b.removeAttribute('disabled');b.style.background=m.c;b.style.color='#fff';
+  }
+}
+
+function subF(){
+  if(ST.fSub) return; ST.fSub=true;
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li]; var score=0;
+  l.ss.forEach(function(s,i){
+    var ch=ST.fAns[i]; var bl=document.getElementById('bl'+i);
+    if(ch===s.blank){if(bl){bl.style.background='#dcfce7';bl.style.borderColor='#16a34a';}score++;}
+    else{if(bl){bl.style.background='#fee2e2';bl.style.borderColor='#dc2626';}var c=document.getElementById('corr'+i);if(c)c.style.display='block';}
+  });
+  document.getElementById('fRes').innerHTML='<div class="'+(score===l.ss.length?'ok':'no')+'">'+(score===l.ss.length?'🎉 Parfait !':score+'/'+l.ss.length+' — Regarde les corrections en vert.')+'</div>';
+  document.getElementById('lb').innerHTML+=doneBtn(l.id,l.xp,m.c);
+  document.getElementById('fBtn').remove();
+}
+
+function renderScen(l,m){renderScenStep(l,m);}
+
+function renderScenStep(l,m){
+  var h='<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:14px;color:#0369a1">🎭 '+l.setup+'</div>';
+  l.ex.forEach(function(e,i){
+    if(i>ST.step&&!ST.fin) return;
+    var ch=ST.choices[i];
+    h+='<div style="margin-bottom:20px">'+
+      '<div class="row"><div style="font-size:20px">👤</div>'+
+      '<div class="bubble" style="background:#f1f5f9;border:1.5px solid #e2e8f0">'+
+      '<div style="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:4px">'+e.s+'</div>'+
+      '<div>'+e.t+'</div></div></div>';
+    e.o.forEach(function(opt,oi){
+      var bg='#f1f5f9',br='#e2e8f0',col='#475569',fw='400';
+      if(ch!==undefined){
+        if(oi===e.c){bg='#dcfce7';br='#16a34a';col='#166534';fw='700';}
+        else if(ch===oi){bg='#fee2e2';br='#dc2626';col='#7f1d1d';}
+      }
+      var clickable=ch===undefined&&i===ST.step;
+      h+='<div style="background:'+bg+';border:2px solid '+br+';border-radius:12px;padding:10px 14px;margin-bottom:8px;margin-left:32px;font-size:14px;color:'+col+';font-weight:'+fw+';cursor:'+(clickable?'pointer':'default')+'"'+
+        (clickable?' onclick="chooseScen('+i+','+oi+')"':'')+'>👩 '+opt+'</div>';
+    });
+    if(ch!==undefined){
+      var ok=e.c===ch;
+      h+='<div style="margin-left:32px;background:'+(ok?'#dcfce7':'#fef3c7')+';border:1.5px solid '+(ok?'#16a34a':'#fbbf24')+';border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:'+(ok?'#166534':'#92400e')+'">'+e.f[ch]+'</div>';
+    }
+    h+='</div>';
+  });
+  if(ST.fin) h+=doneBtn(l.id,l.xp,m.c);
+  document.getElementById('lb').innerHTML=h;
+}
+
+function chooseScen(i,oi){
+  if(ST.choices[i]!==undefined) return;
+  ST.choices[i]=oi;
+  var l=DATA[ST.mi].lessons[ST.li]; var m=DATA[ST.mi];
+  var isLast=i===l.ex.length-1;
+  if(isLast) ST.fin=true; else ST.step=i+1;
+  renderScenStep(l,m);
+}
+
+function renderRead(l,m){
+  document.getElementById('lb').innerHTML=
+    '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px;font-size:15px;line-height:1.9;white-space:pre-line;margin-bottom:20px;color:#1e293b">'+l.text+'</div>'+
+    '<div style="font-weight:700;color:#1e293b;margin-bottom:12px">📋 Questions de compréhension :</div>'+
+    l.qs.map(function(q,qi){
+      return '<div style="margin-bottom:18px"><div style="font-weight:600;color:#1e293b;margin-bottom:8px">'+(qi+1)+'. '+q.q+'</div>'+
+        q.o.map(function(opt,oi){return '<div class="opt" id="r'+qi+'_'+oi+'" onclick="pickR('+qi+','+oi+','+q.a+')">'+opt+'</div>';}).join('')+'</div>';
+    }).join('')+
+    '<div id="rRes"></div>'+
+    '<button id="rBtn" class="btn" disabled style="background:#e2e8f0;color:#94a3b8" onclick="subR()">Vérifier</button>';
+}
+
+function pickR(qi,oi,ans){
+  if(ST.rSub) return;
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li];
+  var prev=ST.rAns[qi];
+  if(prev!==undefined) styleOpt('r'+qi+'_'+prev,'#f1f5f9','#e2e8f0','#1e293b',false);
+  ST.rAns[qi]=oi;
+  styleOpt('r'+qi+'_'+oi,m.bg,m.c,m.c,true);
+  if(Object.keys(ST.rAns).length===l.qs.length){
+    var b=document.getElementById('rBtn');b.removeAttribute('disabled');b.style.background=m.c;b.style.color='#fff';
+  }
+}
+
+function subR(){
+  if(ST.rSub) return; ST.rSub=true;
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li]; var score=0;
+  l.qs.forEach(function(q,qi){
+    q.o.forEach(function(_,oi){
+      var el=document.getElementById('r'+qi+'_'+oi);
+      if(el) el.onclick=null;
+      if(oi===q.a){styleOpt('r'+qi+'_'+oi,'#dcfce7','#16a34a','#166534',true);}
+      else if(ST.rAns[qi]===oi){styleOpt('r'+qi+'_'+oi,'#fee2e2','#dc2626','#7f1d1d',false);}
+      else styleOpt('r'+qi+'_'+oi,'#f1f5f9','#e2e8f0','#1e293b',false);
+    });
+    if(ST.rAns[qi]===q.a) score++;
+  });
+  document.getElementById('rRes').innerHTML='<div class="'+(score===l.qs.length?'ok':'no')+'">'+(score===l.qs.length?'🎉 Parfait !':score+'/'+l.qs.length+' — Relis le texte.')+'</div>';
+  document.getElementById('lb').innerHTML+=doneBtn(l.id,l.xp,m.c);
+  document.getElementById('rBtn').remove();
+}
+
+function renderWrit(l,m){
+  document.getElementById('lb').innerHTML=
+    '<div style="background:'+m.bg+';border:1.5px solid '+m.c+'40;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:14px;color:#1e293b">✍️ <strong>Consigne :</strong> '+l.prompt+'</div>'+
+    '<div style="margin-bottom:12px">'+l.tips.map(function(t){return '<div style="font-size:13px;color:#64748b;margin-bottom:4px">• '+t+'</div>';}).join('')+'</div>'+
+    '<textarea id="wArea" rows="8" style="border-color:'+m.c+'60" oninput="updWC()">'+l.start+'</textarea>'+
+    '<div id="wWC" style="font-size:12px;color:#94a3b8;margin-top:4px">0 mots</div>'+
+    '<div id="wRes"></div>'+
+    '<button id="wBtn" class="btn" disabled style="background:#e2e8f0;color:#94a3b8" onclick="subW()">Soumettre ma réponse</button>';
+  updWC();
+}
+
+function updWC(){
+  var ta=document.getElementById('wArea'); if(!ta) return;
+  var wc=ta.value.trim().split(/\s+/).filter(function(w){return w;}).length;
+  var wd=document.getElementById('wWC'); if(wd) wd.textContent=wc+' mots';
+  var b=document.getElementById('wBtn'); if(!b) return;
+  var m=DATA[ST.mi];
+  if(wc>=20){b.removeAttribute('disabled');b.style.background=m.c;b.style.color='#fff';}
+  else{b.setAttribute('disabled','');b.style.background='#e2e8f0';b.style.color='#94a3b8';}
+}
+
+function subW(){
+  if(ST.wSub) return; ST.wSub=true;
+  var ta=document.getElementById('wArea'); if(ta) ta.setAttribute('readonly','');
+  var m=DATA[ST.mi]; var l=m.lessons[ST.li];
+  document.getElementById('wRes').innerHTML='<div class="ok">🎉 Bravo ! Ta rédaction est enregistrée. Continue comme ça !</div>';
+  document.getElementById('lb').innerHTML+=doneBtn(l.id,l.xp,m.c);
+  document.getElementById('wBtn').remove();
+}
+
+function complete(lid,xp){
+  if(ST.done.indexOf(lid)<0){ST.done.push(lid);ST.xp+=xp;}
+  var m=DATA[ST.mi]; var l=m.lessons;
+  var idx=l.findIndex(function(x){return x.id===lid;});
+  if(idx<l.length-1){openLesson(idx+1);}
+  else{showDone();}
+}
+
+function showDone(){
+  var m=DATA[ST.mi];
+  var pct=Math.round(ST.xp/MAX_XP*100);
+  var earned=BADGES.filter(function(b){return b.ok(ST.xp,ST.done);});
+  document.getElementById('doneText').innerHTML='Tu as terminé <strong>'+m.title+'</strong> à '+m.city+' !';
+  document.getElementById('doneCard').style.background=m.bg;
+  document.getElementById('doneCard').style.border='2px solid '+m.c+'40';
+  document.getElementById('doneCard').innerHTML='<div style="font-size:40px;margin-bottom:8px">'+m.icon+'</div>'+
+    '<div style="font-weight:800;color:'+m.c+';font-size:22px">'+ST.xp+' XP total</div>'+
+    '<div class="pbar" style="margin:12px 0 4px"><div style="width:'+pct+'%;background:linear-gradient(90deg,'+m.c+',#a855f7);height:100%;border-radius:99px"></div></div>'+
+    '<div style="color:#94a3b8;font-size:13px">'+pct+'% du cours total</div>';
+  document.getElementById('doneBadges').innerHTML=earned.map(function(b){return '<span style="font-size:28px;margin:0 6px">'+b.icon+'</span>';}).join('');
+  document.getElementById('doneBtn').style.background=m.c;
+  go('sDone');
+}
+
+renderHome();
+</script>
+</body>
+</html>
