@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Le Français en Voyage 🌍</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f8fafc;font-family:'Segoe UI',sans-serif;min-height:100vh}
+.screen{display:none;max-width:700px;margin:0 auto;padding:24px 16px}
+.screen.active{display:block}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.btn{border:none;border-radius:99px;padding:12px 28px;font-weight:700;font-size:15px;cursor:pointer;margin-top:16px;display:inline-block}
+.btn:disabled{background:#e2e8f0!important;color:#94a3b8;cursor:not-allowed}
+.progress-bar{background:#e2e8f0;border-radius:99px;height:12px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#6366f1,#a855f7);transition:width .5s}
+.module-card{border-radius:16px;padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:16px;margin-bottom:14px;border:2px solid transparent;transition:box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.module-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.lesson-card{background:#fff;border-radius:14px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:12px;border:2px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.lesson-card.done{border-color:var(--mc)}
+.lesson-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.hint-box{background:#fef3c7;border:1.5px solid #fbbf24;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#92400e}
+.dialogue-bubble{border-radius:14px;padding:10px 14px;max-width:80%;margin-bottom:4px}
+.dialogue-row{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.dialogue-row.right{flex-direction:row-reverse}
+.opt{border:2px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer;background:#f1f5f9;transition:all .2s;font-size:15px}
+.opt:hover{border-color:#6366f1;background:#eef2ff}
+.opt.selected{font-weight:700}
+.opt.correct{background:#dcfce7!important;border-color:#16a34a!important;color:#166534!important}
+.opt.wrong{background:#fee2e2!important;border-color:#dc2626!important;color:#7f1d1d!important}
+.fillin-opt{border:2px solid #e2e8f0;border-radius:99px;padding:6px 16px;margin:4px;cursor:pointer;background:#f1f5f9;font-weight:600;font-size:14px;display:inline-block;transition:all .2s}
+.fillin-opt:hover{border-color:#6366f1}
+.fillin-opt.selected{font-weight:700}
+.blank{border:2px solid #e2e8f0;border-radius:8px;padding:2px 12px;font-weight:700;display:inline-block;min-width:80px;text-align:center;background:#f1f5f9;transition:all .2s}
+.result-box{border-radius:12px;padding:14px 18px;font-weight:700;margin-top:12px}
+.result-ok{background:#dcfce7;color:#166534}
+.result-partial{background:#fef3c7;color:#92400e}
+.reading-text{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px;font-size:15px;line-height:1.9;white-space:pre-line;margin-bottom:20px;color:#1e293b}
+.writing-area{width:100%;border-radius:12px;padding:12px 14px;font-size:14px;font-family:inherit;resize:vertical;outline:none;line-height:1.7;border:2px solid #ccc;color:#1e293b;margin-top:8px}
+.tip{font-size:13px;color:#64748b;margin-bottom:4px}
+.badge{text-align:center;background:#faf5ff;border:2px solid #a855f7;border-radius:12px;padding:8px 14px;display:inline-block;margin:4px}
+.vocab-row{display:flex;gap:8px;background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:6px}
+textarea{box-sizing:border-box}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div style="text-align:center;margin-bottom:28px">
+    <div style="font-size:48px">🇫🇷</div>
+    <h1 style="font-size:26px;font-weight:800;color:#1e293b;margin:8px 0 4px">Le Français en Voyage 🌍</h1>
+    <p style="color:#64748b;font-size:15px">Parcours interactif B1 pour Alexandra</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <span style="font-weight:700;color:#1e293b">Progression</span>
+      <span id="home-xp" style="color:#6366f1;font-weight:700">0 XP</span>
+    </div>
+    <div class="progress-bar"><div id="home-bar" class="progress-fill" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#94a3b8;margin-top:4px">
+      <span id="home-lessons">0/13 leçons</span><span id="home-pct">0%</span>
+    </div>
+  </div>
+  <div id="badges-box" style="display:none" class="card">
+    <div style="font-weight:700;color:#1e293b;margin-bottom:10px">🏅 Badges obtenus</div>
+    <div id="badges-list"></div>
+  </div>
+  <div id="modules-list"></div>
+  <div style="text-align:center;color:#94a3b8;font-size:13px;margin-top:20px">⏱ 4 heures · Niveau B1 · Russe disponible 🇷🇺</div>
+</div>
+
+<!-- MODULE -->
+<div id="module" class="screen">
+  <button onclick="show('home')" style="background:none;border:none;font-weight:700;cursor:pointer;font-size:15px;margin-bottom:16px" id="mod-back">← Retour</button>
+  <div id="mod-header" class="card"></div>
+  <div id="mod-lessons"></div>
+</div>
+
+<!-- LESSON -->
+<div id="lesson" class="screen">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <button onclick="show('module')" id="les-back" style="background:none;border:none;font-weight:700;cursor:pointer;font-size:15px">← Module</button>
+    <div style="flex:1"></div>
+    <button id="hint-btn" onclick="toggleHint()" style="border:none;border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:600;font-size:13px;color:#92400e;background:#f1f5f9">🇷🇺 Подсказка</button>
+  </div>
+  <div id="hint-box" class="hint-box" style="display:none"></div>
+  <div id="lesson-content" class="card"></div>
+</div>
+
+<!-- MODULE COMPLETE -->
+<div id="modcomplete" class="screen" style="text-align:center">
+  <div style="font-size:64px;margin-bottom:16px">🎉</div>
+  <h2 style="font-size:24px;font-weight:800;color:#1e293b">Module complété !</h2>
+  <p id="mc-text" style="color:#64748b;font-size:16px;margin:8px 0"></p>
+  <div id="mc-card" class="card" style="margin:20px 0"></div>
+  <div id="mc-badges" style="margin-bottom:20px"></div>
+  <button onclick="show('home')" id="mc-btn" class="btn" style="color:#fff">Retour au menu →</button>
+</div>
+
+<script>
+const MODULES=[
+  {id:0,icon:"🗼",city:"Paris, France",title:"À Paris",color:"#6366f1",bg:"#eef2ff",lessons:[
+    {id:"0-0",type:"dialogue",title:"À l'hôtel",xp:30,hint:"Диалог в отеле — практикуй вежливые формы обращения!",
+     lines:[{s:"Réceptionniste",t:"Bonjour ! Vous avez une réservation ?"},{s:"Alexandra",t:"Oui, j'ai réservé une chambre pour trois nuits au nom d'Ivanova."},{s:"Réceptionniste",t:"Parfait ! Chambre 214, au deuxième étage. Voici votre clé."},{s:"Alexandra",t:"Merci. Est-ce que le petit-déjeuner est inclus ?"},{s:"Réceptionniste",t:"Oui, il est servi de 7h à 10h au restaurant."}],
+     vocab:[{fr:"une réservation",ru:"бронирование"},{fr:"au nom de",ru:"на имя"},{fr:"le deuxième étage",ru:"второй этаж"},{fr:"le petit-déjeuner",ru:"завтрак"},{fr:"est inclus",ru:"включён"}]},
+    {id:"0-1",type:"quiz",title:"Quiz — L'hôtel",xp:40,hint:"Вопросы по диалогу — выбери правильный ответ!",
+     questions:[{q:"Pour combien de nuits Alexandra a-t-elle réservé ?",o:["Deux nuits","Trois nuits","Une semaine","Quatre nuits"],a:1},{q:"À quel étage est la chambre ?",o:["Premier","Troisième","Deuxième","Rez-de-chaussée"],a:2},{q:"Jusqu'à quelle heure est servi le petit-déjeuner ?",o:["9h","11h","10h","8h"],a:2}]},
+    {id:"0-2",type:"fillin",title:"Grammaire — Le subjonctif présent",xp:50,hint:"Сюбжонктив используется после глаголов желания и эмоций. Ex: 'il faut que tu viennes'.",
+     expl:"Le subjonctif s'utilise après : vouloir que, il faut que, être content(e) que...",
+     sentences:[{b:"Il faut que tu ",blank:"sois",a:" à l'heure pour le départ.",o:["es","sois","être","soit"]},{b:"Je suis contente que vous ",blank:"puissiez",a:" nous rejoindre.",o:["pouvez","pouvoir","puissiez","puissent"]},{b:"Il vaut mieux que nous ",blank:"prenions",a:" le métro.",o:["prenons","prendrons","prenions","prendre"]}]},
+    {id:"0-3",type:"scenario",title:"Scénario — Au musée du Louvre",xp:60,hint:"Ролевой сценарий — выбери подходящую реплику!",
+     setup:"Tu es devant la pyramide du Louvre. Un touriste t'aborde.",
+     exchanges:[{s:"Touriste",t:"Excusez-moi, savez-vous où se trouve la Joconde ?",o:["Je ne sais pas parler.","Oui, elle est dans la salle Denon, au premier étage !","Non, je veux partir."],c:1,f:["Trop abrupte ! 😅","Parfait ! Tu guides comme une vraie Parisienne 🎉","Pas très aimable..."]},{s:"Touriste",t:"Merci ! Vous visitez aussi le musée aujourd'hui ?",o:["Oui, je prévois de voir les antiquités grecques.","Non, je suis pressée.","Peut-être demain ou jamais."],c:0,f:["Excellent ! Réponse naturelle 👏","Correct, mais un peu sec !","Pas très communicatif..."]}]}
+  ]},
+  {id:1,icon:"🇨🇭",city:"Genève, Suisse",title:"À Genève",color:"#0891b2",bg:"#ecfeff",lessons:[
+    {id:"1-0",type:"reading",title:"Lecture — La santé en Suisse",xp:40,hint:"Чтение о швейцарской системе здравоохранения.",
+     text:"En Suisse, tout résident est obligé de souscrire une assurance maladie de base, appelée LAMal. Cette assurance couvre les soins médicaux essentiels : consultations, hospitalisations, et médicaments sur ordonnance.\n\nChaque assuré choisit son médecin de famille, qui sert de médecin traitant. Pour consulter un spécialiste, il faut généralement une référence de ce médecin.\n\nGenève est connue pour ses nombreuses organisations internationales, ce qui attire des professionnels du monde entier — comme Alexandra !",
+     questions:[{q:"Qu'est-ce que la LAMal ?",o:["Une banque suisse","L'assurance maladie obligatoire","Un hôpital genevois","Une carte de transport"],a:1},{q:"Que faut-il pour consulter un spécialiste ?",o:["Payer en avance","Parler allemand","Une référence du médecin traitant","Un passeport européen"],a:2}]},
+    {id:"1-1",type:"writing",title:"Email professionnel",xp:70,hint:"'Je me permets de vous contacter' = Позвольте обратиться к вам. 'Veuillez agréer mes salutations distinguées' = С уважением (официально).",
+     prompt:"Rédige un email à ton médecin genevois pour prendre rendez-vous. Inclus : ton nom, le motif, tes disponibilités, et une formule de politesse.",
+     starter:"Madame, Monsieur,\n\nJe me permets de vous contacter afin de...",
+     tips:["Commence par 'Je me permets de...' pour être poli(e)","Propose deux créneaux disponibles","Termine par : 'Veuillez agréer mes salutations distinguées.'"]},
+    {id:"1-2",type:"quiz",title:"Quiz — Vocabulaire médical",xp:40,hint:"Медицинская лексика — пригодится в любой франкоязычной стране!",
+     questions:[{q:"Comment dit-on 'ordonnance' en français ?",o:["ordination","prescription","ordonnance","réservation"],a:2},{q:"Que veut dire 'avoir de la fièvre' ?",o:["avoir faim","avoir chaud","avoir une température élevée","avoir mal au dos"],a:2},{q:"Synonyme de 'médecin' ?",o:["infirmier","docteur","pharmacien","dentiste"],a:1},{q:"Qu'est-ce qu'une 'franchise' médicale ?",o:["Une clinique gratuite","Le montant à payer avant remboursement","Un médicament","Un remboursement immédiat"],a:1}]}
+  ]},
+  {id:2,icon:"🍫",city:"Bruxelles, Belgique",title:"À Bruxelles",color:"#d97706",bg:"#fffbeb",lessons:[
+    {id:"2-0",type:"dialogue",title:"Au marché",xp:30,hint:"Разговор на рынке — числа, количества!",
+     lines:[{s:"Vendeur",t:"Bonjour ! Qu'est-ce qu'il vous faut aujourd'hui ?"},{s:"Alexandra",t:"Bonjour ! Je voudrais un kilo de tomates et une botte de persil, s'il vous plaît."},{s:"Vendeur",t:"Voilà ! Et avec ça ?"},{s:"Alexandra",t:"C'est combien pour les fraises ? Elles ont l'air délicieuses !"},{s:"Vendeur",t:"Trois euros la barquette. Si vous en prenez deux, je vous fais un prix !"},{s:"Alexandra",t:"D'accord, je prends deux barquettes alors. Merci !"}],
+     vocab:[{fr:"une botte de persil",ru:"пучок петрушки"},{fr:"une barquette",ru:"лоток/упаковка"},{fr:"avoir l'air...",ru:"выглядеть..."},{fr:"je vous fais un prix",ru:"сделаю скидку"},{fr:"Et avec ça ?",ru:"Что-нибудь ещё?"}]},
+    {id:"2-1",type:"fillin",title:"Grammaire — Le conditionnel",xp:50,hint:"Кондиционал: инфинитив + -ais, -ais, -ait, -ions, -iez, -aient.",
+     expl:"Le conditionnel exprime la politesse ou une hypothèse. 'Je voudrais un café' est plus poli que 'Je veux un café'.",
+     sentences:[{b:"Est-ce que vous ",blank:"pourriez",a:" m'indiquer la rue du Marché ?",o:["pouvez","pourriez","pouviez","puissiez"]},{b:"J'",blank:"aimerais",a:" goûter les gaufres belges.",o:["aime","aimais","aimerais","aimerai"]},{b:"Si j'avais le temps, je ",blank:"visiterais",a:" le Manneken Pis.",o:["visite","visitais","visiterai","visiterais"]}]},
+    {id:"2-2",type:"scenario",title:"Scénario — Au restaurant belge",xp:60,hint:"Заказ в ресторане — используй кондиционал для вежливости!",
+     setup:"Tu es dans une brasserie bruxelloise. Le serveur s'approche.",
+     exchanges:[{s:"Serveur",t:"Bonsoir ! Vous avez choisi ?",o:["Oui, donnez-moi des moules.","Je voudrais les moules-frites, s'il vous plaît.","Je veux manger maintenant."],c:1,f:["Trop direct — le conditionnel serait plus poli !","Parfait ! Poli et naturel 🍟🦪","Trop brusque !"]},{s:"Serveur",t:"Et comme boisson ?",o:["De l'eau gazeuse, s'il vous plaît.","De l'eau.","Rien."],c:0,f:["Excellent ! Complet et poli 👏","Correct mais incomplet — ajoute 's'il vous plaît' !","C'est un peu sec..."]}]}
+  ]},
+  {id:3,icon:"🌴",city:"Martinique",title:"En Martinique",color:"#16a34a",bg:"#f0fdf4",lessons:[
+    {id:"3-0",type:"reading",title:"Lecture — La culture créole",xp:40,hint:"Чтение о культуре Мартиники — угадывай незнакомые слова из контекста!",
+     text:"La Martinique est un département français d'outre-mer situé dans les Caraïbes. On y parle français, mais aussi le créole martiniquais, une langue mêlant le français, l'africain et des influences amérindiennes.\n\nLa culture martiniquaise est riche et colorée. Le zouk, né aux Antilles, est un genre musical incontournable. La cuisine locale mélange épices, poissons frais et légumes tropicaux. Le plat traditionnel est le colombo, un curry antillais parfumé.\n\nLes Martiniquais sont réputés pour leur chaleur humaine. N'oublie pas de goûter les accras de morue !",
+     questions:[{q:"Quelles langues parle-t-on en Martinique ?",o:["Français seulement","Créole seulement","Français et créole","Espagnol et français"],a:2},{q:"Qu'est-ce que le colombo ?",o:["Une danse antillaise","Un curry antillais","Un fruit tropical","Un instrument de musique"],a:1}]},
+    {id:"3-1",type:"quiz",title:"Quiz final — Tour du monde francophone",xp:80,hint:"Финальный тест по всему курсу! Ты молодец — почти у цели 🎉",
+     questions:[{q:"Subjonctif de 'être' à la 2e personne du singulier ?",o:["es","seras","sois","étais"],a:2},{q:"Comment commander poliment ?",o:["Je veux une table","Donnez-moi une table","Je voudrais une table, s'il vous plaît","Une table maintenant"],a:2},{q:"Que signifie la LAMal en Suisse ?",o:["Un train suisse","L'assurance maladie obligatoire","Un musée genevois","Un parti politique"],a:1},{q:"'Et avec ça ?' signifie ?",o:["C'est tout ?","Vous voulez autre chose ?","Quoi d'autre ?","Toutes ces réponses"],a:3},{q:"Genre musical né aux Antilles ?",o:["Reggae","Salsa","Zouk","Bossa nova"],a:2}]},
+    {id:"3-2",type:"writing",title:"Défi final — Carte postale de Martinique",xp:80,hint:"Passé composé: avoir/être + причастие. 'J'ai mangé' (я съела), 'Je suis allée' (я пошла — глаголы движения с être!).",
+     prompt:"Écris une carte postale à ton ami(e) depuis la Martinique (80-100 mots). Décris : le temps, ce que tu as vu, mangé, et ce que tu vas faire demain.",
+     starter:"Chère/Cher ...,\n\nMe voilà en Martinique ! Le soleil...",
+     tips:["Utilise le passé composé : 'J'ai visité...', 'Nous avons mangé...'","Adjectifs : magnifique, coloré, épicé, chaleureux","Pour demain : 'Je vais aller à la plage / goûter les accras'"]}
+  ]}
+];
+
+const BADGES=[
+  {id:"b1",icon:"👣",label:"Premier Pas",ok:(x)=>x>=30},
+  {id:"b2",icon:"⭐",label:"Mi-Parcours",ok:(x)=>x>=200},
+  {id:"b3",icon:"📚",label:"Grammairienne",ok:(_,d)=>d.some(id=>id.includes("fillin"))},
+  {id:"b4",icon:"✍️",label:"Plume d'or",ok:(_,d)=>d.some(id=>id.includes("writing"))},
+  {id:"b5",icon:"🏆",label:"Championne B1",ok:(x)=>x>=600},
+];
+const MAX_XP=MODULES.reduce((s,m)=>s+m.lessons.reduce((ss,l)=>ss+l.xp,0),0);
+const TOTAL=MODULES.reduce((s,m)=>s+m.lessons.length,0);
+
+let state={xp:0,done:[],curMod:0,curLesson:0,hint:false,ls:{}};
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='home') renderHome();
+}
+
+function tIcon(t){return{dialogue:"💬",quiz:"❓",fillin:"📝",scenario:"🎭",reading:"📖",writing:"✍️"}[t]||"📋";}
+
+function renderHome(){
+  const pct=Math.round((state.done.length/TOTAL)*100);
+  document.getElementById('home-xp').textContent=state.xp+' XP';
+  document.getElementById('home-bar').style.width=pct+'%';
+  document.getElementById('home-lessons').textContent=state.done.length+'/'+TOTAL+' leçons';
+  document.getElementById('home-pct').textContent=pct+'%';
+
+  const badges=BADGES.filter(b=>b.ok(state.xp,state.done));
+  const bb=document.getElementById('badges-box');
+  if(badges.length>0){
+    bb.style.display='block';
+    document.getElementById('badges-list').innerHTML=badges.map(b=>`<span class="badge"><div style="font-size:22px">${b.icon}</div><div style="font-size:11px;font-weight:600;color:#7c3aed">${b.label}</div></span>`).join('');
+  } else bb.style.display='none';
+
+  document.getElementById('modules-list').innerHTML=MODULES.map((mod,idx)=>{
+    const d=mod.lessons.filter(l=>state.done.includes(l.id)).length,t=mod.lessons.length;
+    const p=Math.round((d/t)*100);
+    return `<div class="module-card" style="background:${mod.bg};border-color:${mod.color}30" onclick="openModule(${idx})">
+      <div style="font-size:36px">${mod.icon}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:#1e293b;font-size:16px">${mod.title}</div>
+        <div style="color:#64748b;font-size:13px">${mod.city} · ${t} leçons</div>
+        <div class="progress-bar" style="height:6px;margin-top:8px"><div style="width:${p}%;background:${mod.color};height:100%;border-radius:99px"></div></div>
+      </div>
+      <div style="color:${mod.color};font-weight:800;font-size:18px">${d}/${t}</div>
+    </div>`;
+  }).join('');
+}
+
+function openModule(idx){
+  state.curMod=idx;
+  const mod=MODULES[idx];
+  document.getElementById('mod-back').style.color=mod.color;
+  document.getElementById('mod-header').innerHTML=`<div style="font-size:40px;margin-bottom:8px">${mod.icon}</div><h2 style="font-size:22px;font-weight:800;color:#1e293b;margin:0 0 4px">${mod.title}</h2><div style="color:#64748b;font-size:14px">${mod.city}</div>`;
+  document.getElementById('mod-header').style.background=mod.bg;
+  document.getElementById('mod-header').style.border=`2px solid ${mod.color}30`;
+  document.getElementById('mod-lessons').innerHTML=mod.lessons.map((l,i)=>{
+    const d=state.done.includes(l.id);
+    return `<div class="lesson-card${d?' done':''}" style="--mc:${mod.color}" onclick="openLesson(${i})">
+      <div style="font-size:24px">${d?'✅':tIcon(l.type)}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;color:#1e293b">${l.title}</div>
+        <div style="color:#94a3b8;font-size:13px">${l.type} · ${l.xp} XP</div>
+      </div>
+      ${d?`<span style="color:${mod.color};font-weight:800">✓</span>`:''}
+    </div>`;
+  }).join('');
+  show('module');
+}
+
+function openLesson(idx){
+  state.curLesson=idx;
+  state.hint=false;
+  state.ls={};
+  renderLesson();
+  show('lesson');
+}
+
+function toggleHint(){
+  state.hint=!state.hint;
+  const mod=MODULES[state.curMod];
+  const lesson=mod.lessons[state.curLesson];
+  const hb=document.getElementById('hint-box');
+  const hbtn=document.getElementById('hint-btn');
+  if(state.hint){hb.style.display='block';hb.textContent='💡 '+lesson.hint;hbtn.style.background='#fef3c7';hbtn.textContent='🇷🇺 Скрыть';}
+  else{hb.style.display='none';hbtn.style.background='#f1f5f9';hbtn.textContent='🇷🇺 Подсказка';}
+}
+
+function renderLesson(){
+  const mod=MODULES[state.curMod];
+  const lesson=mod.lessons[state.curLesson];
+  document.getElementById('les-back').style.color=mod.color;
+  document.getElementById('hint-btn').style.color='#92400e';
+  const c=document.getElementById('lesson-content');
+  c.innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:18px">
+    <span style="font-size:26px">${tIcon(lesson.type)}</span>
+    <div><h2 style="margin:0;font-size:18px;font-weight:800;color:#1e293b">${lesson.title}</h2>
+    <span style="color:${mod.color};font-weight:700;font-size:13px">${lesson.xp} XP</span></div>
+  </div><div id="lesson-body"></div>`;
+  const t=lesson.type;
+  if(t==='dialogue') renderDialogue(lesson,mod);
+  else if(t==='quiz') renderQuiz(lesson,mod);
+  else if(t==='fillin') renderFillin(lesson,mod);
+  else if(t==='scenario') renderScenario(lesson,mod);
+  else if(t==='reading') renderReading(lesson,mod);
+  else if(t==='writing') renderWriting(lesson,mod);
+}
+
+function renderDialogue(l,mod){
+  const ad=state.done.includes(l.id);
+  document.getElementById('lesson-body').innerHTML=`
+    <div style="margin-bottom:20px">${l.lines.map(line=>`
+      <div class="dialogue-row ${line.s==='Alexandra'?'right':''}">
+        <div style="font-size:20px">${line.s==='Alexandra'?'👩':'🧑‍💼'}</div>
+        <div class="dialogue-bubble" style="background:${line.s==='Alexandra'?mod.bg:'#f1f5f9'};border:1.5px solid ${line.s==='Alexandra'?mod.color+'40':'#e2e8f0'}">
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:4px">${line.s}</div>
+          <div style="font-size:15px;color:#1e293b">${line.t}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <button onclick="toggleVocab()" style="background:#f1f5f9;border:none;border-radius:99px;padding:8px 18px;cursor:pointer;font-weight:600;font-size:13px;color:#475569" id="vocab-btn">▼ Voir le vocabulaire</button>
+    <div id="vocab-list" style="display:none;margin-top:12px">${l.vocab.map(v=>`<div class="vocab-row"><span style="font-weight:700;color:${mod.color}">${v.fr}</span><span style="color:#64748b">—</span><span style="color:#475569">${v.ru}</span></div>`).join('')}</div>
+    <div style="margin-top:16px"><button onclick="completeLesson('${l.id}',${l.xp})" class="btn" style="background:${ad?'#e2e8f0':mod.color};color:${ad?'#94a3b8':'#fff'}" ${ad?'disabled':''}>${ad?'✓ Complété':'Continuer →'}</button></div>`;
+}
+
+function toggleVocab(){
+  const v=document.getElementById('vocab-list');
+  const b=document.getElementById('vocab-btn');
+  if(v.style.display==='none'){v.style.display='block';b.textContent='▲ Masquer le vocabulaire';}
+  else{v.style.display='none';b.textContent='▼ Voir le vocabulaire';}
+}
+
+function renderQuiz(l,mod){
+  const ad=state.done.includes(l.id);
+  state.ls={ans:{},sub:false};
+  document.getElementById('lesson-body').innerHTML=`
+    <div id="quiz-qs">${l.questions.map((q,qi)=>`
+      <div style="margin-bottom:20px">
+        <div style="font-weight:700;color:#1e293b;margin-bottom:10px">${qi+1}. ${q.q}</div>
+        ${q.o.map((opt,oi)=>`<div class="opt" id="qo-${qi}-${oi}" onclick="selectQ(${qi},${oi},${q.a},'${mod.color}','${mod.bg}')">${opt}</div>`).join('')}
+      </div>`).join('')}
+    </div>
+    <div id="quiz-result"></div>
+    <button id="quiz-submit" onclick="submitQuiz(${JSON.stringify(l.questions).replace(/'/g,"&#39;")
+    .replace(/"/g,'&quot;')},'${l.id}',${l.xp},'${mod.color}')" class="btn" style="background:#e2e8f0;color:#94a3b8" disabled>Vérifier les réponses</button>`;
+}
+
+function selectQ(qi,oi,ans,color,bg){
+  if(state.ls.sub)return;
+  state.ls.ans=state.ls.ans||{};
+  const prev=state.ls.ans[qi];
+  if(prev!==undefined){const pe=document.getElementById('qo-'+qi+'-'+prev);pe.style.background='#f1f5f9';pe.style.borderColor='#e2e8f0';pe.style.color='#1e293b';pe.style.fontWeight='400';}
+  state.ls.ans[qi]=oi;
+  const el=document.getElementById('qo-'+qi+'-'+oi);
+  el.style.background=bg;el.style.borderColor=color;el.style.color=color;el.style.fontWeight='700';
+  const mod=MODULES[state.curMod];
+  const lesson=mod.lessons[state.curLesson];
+  if(Object.keys(state.ls.ans).length===lesson.questions.length){
+    const btn=document.getElementById('quiz-submit');
+    btn.style.background=color;btn.style.color='#fff';btn.removeAttribute('disabled');
+  }
+}
+
+function submitQuiz(qs,lid,xp,color){
+  if(state.ls.sub)return;
+  state.ls.sub=true;
+  let score=0;
+  qs.forEach((q,qi)=>{
+    const chosen=state.ls.ans[qi];
+    q.o.forEach((_,oi)=>{
+      const el=document.getElementById('qo-'+qi+'-'+oi);
+      el.style.cursor='default';
+      if(oi===q.a){el.style.background='#dcfce7';el.style.borderColor='#16a34a';el.style.color='#166534';el.style.fontWeight='700';}
+      else if(chosen===oi){el.style.background='#fee2e2';el.style.borderColor='#dc2626';el.style.color='#7f1d1d';}
+      else{el.style.background='#f1f5f9';el.style.borderColor='#e2e8f0';el.style.color='#1e293b';}
+    });
+    if(chosen===q.a)score++;
+  });
+  const ad=state.done.includes(lid);
+  document.getElementById('quiz-result').innerHTML=`<div class="result-box ${score===qs.length?'result-ok':'result-partial'}">${score===qs.length?'🎉 Parfait ! Toutes les réponses sont correctes !':`✅ ${score}/${qs.length} — Regarde les réponses correctes en vert.`}</div>`;
+  const btn=document.getElementById('quiz-submit');
+  btn.textContent=ad?'✓ Complété':'Continuer →';
+  btn.style.background=ad?'#e2e8f0':color;btn.style.color=ad?'#94a3b8':'#fff';
+  if(ad)btn.setAttribute('disabled','');
+  else btn.setAttribute('onclick',`completeLesson('${lid}',${xp})`);
+}
+
+function renderFillin(l,mod){
+  const ad=state.done.includes(l.id);
+  state.ls={ans:{},sub:false};
+  document.getElementById('lesson-body').innerHTML=`
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:14px;color:#166534">📖 ${l.expl}</div>
+    <div id="fillin-body">${l.sentences.map((s,i)=>`
+      <div style="margin-bottom:18px" id="fs-${i}">
+        <div style="font-size:15px;color:#1e293b;margin-bottom:10px;line-height:1.8">
+          ${s.b}<span id="blank-${i}" class="blank" style="color:${mod.color}">___</span>${s.a}
+        </div>
+        <div id="corr-${i}" style="display:none;font-size:13px;color:#16a34a;margin-bottom:6px">✓ Réponse correcte : <strong>${s.blank}</strong></div>
+        <div>${s.o.map(opt=>`<span class="fillin-opt" id="fo-${i}-${opt}" onclick="selectFill(${i},'${opt}','${s.blank}','${mod.color}','${mod.bg}')">${opt}</span>`).join('')}</div>
+      </div>`).join('')}
+    </div>
+    <div id="fillin-result"></div>
+    <button id="fillin-submit" onclick="submitFillin(${JSON.stringify(l.sentences).replace(/"/g,'&quot;')},'${l.id}',${l.xp},'${mod.color}')" class="btn" style="background:#e2e8f0;color:#94a3b8" disabled>Vérifier</button>`;
+}
+
+function selectFill(i,opt,blank,color,bg){
+  if(state.ls.sub)return;
+  const prev=state.ls.ans[i];
+  if(prev!==undefined){const pe=document.getElementById('fo-'+i+'-'+prev);if(pe){pe.style.background='#f1f5f9';pe.style.borderColor='#e2e8f0';pe.style.color='#475569';}}
+  state.ls.ans[i]=opt;
+  const el=document.getElementById('fo-'+i+'-'+opt);
+  if(el){el.style.background=bg;el.style.borderColor=color;el.style.color=color;}
+  const bl=document.getElementById('blank-'+i);
+  bl.textContent=opt;bl.style.background=bg;bl.style.borderColor=color;
+  const mod=MODULES[state.curMod];
+  const lesson=mod.lessons[state.curLesson];
+  if(Object.keys(state.ls.ans).length===lesson.sentences.length){
+    const btn=document.getElementById('fillin-submit');
+    btn.style.background=color;btn.style.color='#fff';btn.removeAttribute('disabled');
+  }
+}
+
+function submitFillin(sents,lid,xp,color){
+  if(state.ls.sub)return;
+  state.ls.sub=true;
+  let score=0;
+  sents.forEach((s,i)=>{
+    const chosen=state.ls.ans[i];
+    const bl=document.getElementById('blank-'+i);
+    if(chosen===s.blank){bl.style.background='#dcfce7';bl.style.borderColor='#16a34a';score++;}
+    else{bl.style.background='#fee2e2';bl.style.borderColor='#dc2626';const corr=document.getElementById('corr-'+i);if(corr)corr.style.display='block';}
+    s.o.forEach(opt=>{const el=document.getElementById('fo-'+i+'-'+opt);if(el)el.style.cursor='default';});
+  });
+  const ad=state.done.includes(lid);
+  document.getElementById('fillin-result').innerHTML=`<div class="result-box ${score===sents.length?'result-ok':'result-partial'}">${score===sents.length?'🎉 Parfait !':`${score}/${sents.length} — Regarde les corrections en vert.`}</div>`;
+  const btn=document.getElementById('fillin-submit');
+  btn.textContent=ad?'✓ Complété':'Continuer →';
+  btn.style.background=ad?'#e2e8f0':color;btn.style.color=ad?'#94a3b8':'#fff';
+  if(ad)btn.setAttribute('disabled','');
+  else btn.setAttribute('onclick',`completeLesson('${lid}',${xp})`);
+}
+
+function renderScenario(l,mod){
+  state.ls={step:0,choices:{},fin:false};
+  renderScenarioStep(l,mod);
+}
+
+function renderScenarioStep(l,mod){
+  const ad=state.done.includes(l.id);
+  let html=`<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:14px;color:#0369a1">🎭 ${l.setup}</div>`;
+  l.exchanges.forEach((ex,i)=>{
+    if(i>state.ls.step&&!state.ls.fin)return;
+    const chosen=state.ls.choices[i];
+    html+=`<div style="margin-bottom:20px">
+      <div class="dialogue-row">
+        <div style="font-size:20px">👤</div>
+        <div class="dialogue-bubble" style="background:#f1f5f9;border:1.5px solid #e2e8f0">
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:4px">${ex.s}</div>
+          <div style="font-size:15px;color:#1e293b">${ex.t}</div>
+        </div>
+      </div>`;
+    ex.o.forEach((opt,oi)=>{
+      let bg='#f1f5f9',br='#e2e8f0',col='#475569',fw='400';
+      if(chosen!==undefined){
+        if(oi===ex.c){bg='#dcfce7';br='#16a34a';col='#166534';}
+        else if(chosen===oi){bg='#fee2e2';br='#dc2626';col='#7f1d1d';}
+      }
+      const clickable=chosen===undefined&&i===state.ls.step;
+      html+=`<div style="background:${bg};border:2px solid ${br};border-radius:12px;padding:10px 14px;cursor:${clickable?'pointer':'default'};color:${col};font-weight:${chosen===oi?700:400};margin-bottom:8px;margin-left:32px;font-size:14px" ${clickable?`onclick="chooseScenario(${i},${oi},${JSON.stringify(l).replace(/"/g,'&quot;')
+      },'${mod.color}')"`:''}> 👩 ${opt}</div>`;
+    });
+    if(chosen!==undefined){
+      const ok=ex.c===chosen;
+      html+=`<div style="margin-left:32px;background:${ok?'#dcfce7':'#fef3c7'};border:1.5px solid ${ok?'#16a34a':'#fbbf24'};border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:${ok?'#166534':'#92400e'}">${ex.f[chosen]}</div>`;
+    }
+    html+='</div>';
+  });
+  if(state.ls.fin){
+    html+=`<button onclick="completeLesson('${l.id}',${l.xp})" class="btn" style="background:${ad?'#e2e8f0':mod.color};color:${ad?'#94a3b8':'#fff'}" ${ad?'disabled':''}>${ad?'✓ Complété':'Continuer →'}</button>`;
+  }
+  document.getElementById('lesson-body').innerHTML=html;
+}
+
+function chooseScenario(i,oi,l,color){
+  if(state.ls.choices[i]!==undefined)return;
+  state.ls.choices[i]=oi;
+  const isLast=i===l.exchanges.length-1;
+  if(isLast)state.ls.fin=true;
+  else state.ls.step=i+1;
+  const mod=MODULES[state.curMod];
+  renderScenarioStep(l,mod);
+}
+
+function renderReading(l,mod){
+  const ad=state.done.includes(l.id);
+  state.ls={ans:{},sub:false};
+  document.getElementById('lesson-body').innerHTML=`
+    <div class="reading-text">${l.text}</div>
+    <div style="font-weight:700;color:#1e293b;margin-bottom:14px">📋 Questions de compréhension :</div>
+    <div id="read-qs">${l.questions.map((q,qi)=>`
+      <div style="margin-bottom:18px">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:8px">${qi+1}. ${q.q}</div>
+        ${q.o.map((opt,oi)=>`<div class="opt" id="ro-${qi}-${oi}" onclick="selectR(${qi},${oi},${q.a},'${mod.color}','${mod.bg}')">${opt}</div>`).join('')}
+      </div>`).join('')}
+    </div>
+    <div id="read-result"></div>
+    <button id="read-submit" onclick="submitReading(${JSON.stringify(l.questions).replace(/"/g,'&quot;')},'${l.id}',${l.xp},'${mod.color}')" class="btn" style="background:#e2e8f0;color:#94a3b8" disabled>Vérifier</button>`;
+}
+
+function selectR(qi,oi,ans,color,bg){
+  if(state.ls.sub)return;
+  state.ls.ans=state.ls.ans||{};
+  const prev=state.ls.ans[qi];
+  if(prev!==undefined){const pe=document.getElementById('ro-'+qi+'-'+prev);pe.style.background='#f1f5f9';pe.style.borderColor='#e2e8f0';pe.style.color='#1e293b';pe.style.fontWeight='400';}
+  state.ls.ans[qi]=oi;
+  const el=document.getElementById('ro-'+qi+'-'+oi);
+  el.style.background=bg;el.style.borderColor=color;el.style.color=color;el.style.fontWeight='700';
+  const mod=MODULES[state.curMod];
+  const lesson=mod.lessons[state.curLesson];
+  if(Object.keys(state.ls.ans).length===lesson.questions.length){
+    const btn=document.getElementById('read-submit');
+    btn.style.background=color;btn.style.color='#fff';btn.removeAttribute('disabled');
+  }
+}
+
+function submitReading(qs,lid,xp,color){
+  if(state.ls.sub)return;
+  state.ls.sub=true;
+  let score=0;
+  qs.forEach((q,qi)=>{
+    const chosen=state.ls.ans[qi];
+    q.o.forEach((_,oi)=>{
+      const el=document.getElementById('ro-'+qi+'-'+oi);
+      el.style.cursor='default';
+      if(oi===q.a){el.style.background='#dcfce7';el.style.borderColor='#16a34a';el.style.color='#166534';el.style.fontWeight='700';}
+      else if(chosen===oi){el.style.background='#fee2e2';el.style.borderColor='#dc2626';el.style.color='#7f1d1d';}
+      else{el.style.background='#f1f5f9';el.style.borderColor='#e2e8f0';el.style.color='#1e293b';}
+    });
+    if(chosen===q.a)score++;
+  });
+  const ad=state.done.includes(lid);
+  document.getElementById('read-result').innerHTML=`<div class="result-box ${score===qs.length?'result-ok':'result-partial'}">${score===qs.length?'🎉 Parfait !':`${score}/${qs.length} — Relis le texte pour les corrections.`}</div>`;
+  const btn=document.getElementById('read-submit');
+  btn.textContent=ad?'✓ Complété':'Continuer →';
+  btn.style.background=ad?'#e2e8f0':color;btn.style.color=ad?'#94a3b8':'#fff';
+  if(ad)btn.setAttribute('disabled','');
+  else btn.setAttribute('onclick',`completeLesson('${lid}',${xp})`);
+}
+
+function renderWriting(l,mod){
+  const ad=state.done.includes(l.id);
+  state.ls={text:l.starter,sub:false};
+  document.getElementById('lesson-body').innerHTML=`
+    <div style="background:${mod.bg};border:1.5px solid ${mod.color}40;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#1e293b">✍️ <strong>Consigne :</strong> ${l.prompt}</div>
+    <div style="margin-bottom:14px">
+      <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:8px">💡 Conseils :</div>
+      ${l.tips.map(tip=>`<div class="tip">• ${tip}</div>`).join('')}
+    </div>
+    <textarea id="writing-area" class="writing-area" rows="8" oninput="updateWC()" style="border-color:${mod.color}60">${l.starter}</textarea>
+    <div id="wc-display" style="font-size:12px;color:#94a3b8;margin-top:4px">0 mots</div>
+    <div id="writing-result"></div>
+    <button id="writing-submit" onclick="submitWriting('${l.id}',${l.xp},'${mod.color}')" class="btn" style="background:#e2e8f0;color:#94a3b8" disabled>Soumettre ma réponse</button>`;
+  updateWC();
+}
+
+function updateWC(){
+  const ta=document.getElementById('writing-area');
+  if(!ta)return;
+  const wc=ta.value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('wc-display').textContent=wc+' mots';
+  const mod=MODULES[state.curMod];
+  const btn=document.getElementById('writing-submit');
+  if(wc>=20){btn.style.background=mod.color;btn.style.color='#fff';btn.removeAttribute('disabled');}
+  else{btn.style.background='#e2e8f0';btn.style.color='#94a3b8';btn.setAttribute('disabled','');}
+}
+
+function submitWriting(lid,xp,color){
+  if(state.ls.sub)return;
+  state.ls.sub=true;
+  document.getElementById('writing-area').setAttribute('readonly','');
+  const ad=state.done.includes(lid);
+  document.getElementById('writing-result').innerHTML=`<div class="result-box result-ok">🎉 Bravo ! Ta rédaction est enregistrée. Continue comme ça !</div>`;
+  const btn=document.getElementById('writing-submit');
+  btn.textContent=ad?'✓ Complété':'Continuer →';
+  btn.style.background=ad?'#e2e8f0':color;btn.style.color=ad?'#94a3b8':'#fff';
+  if(ad)btn.setAttribute('disabled','');
+  else btn.setAttribute('onclick',`completeLesson('${lid}',${xp})`);
+}
+
+function completeLesson(lid,xp){
+  if(!state.done.includes(lid)){state.done.push(lid);state.xp+=xp;}
+  const mod=MODULES[state.curMod];
+  const idx=mod.lessons.findIndex(l=>l.id===lid);
+  if(idx<mod.lessons.length-1){
+    state.curLesson=idx+1;state.hint=false;state.ls={};
+    document.getElementById('hint-box').style.display='none';
+    document.getElementById('hint-btn').style.background='#f1f5f9';
+    document.getElementById('hint-btn').textContent='🇷🇺 Подсказка';
+    renderLesson();
+  } else showModComplete();
+}
+
+function showModComplete(){
+  const mod=MODULES[state.curMod];
+  const pct=Math.round((state.xp/MAX_XP)*100);
+  const badges=BADGES.filter(b=>b.ok(state.xp,state.done));
+  document.getElementById('mc-text').innerHTML=`Tu as terminé <strong>${mod.title}</strong> à ${mod.city} !`;
+  document.getElementById('mc-card').innerHTML=`
+    <div style="font-size:40px;margin-bottom:8px">${mod.icon}</div>
+    <div style="font-weight:800;color:${mod.color};font-size:22px">${state.xp} XP total</div>
+    <div class="progress-bar" style="margin:12px 0 4px"><div style="width:${pct}%;background:linear-gradient(90deg,${mod.color},#a855f7);height:100%;border-radius:99px"></div></div>
+    <div style="color:#94a3b8;font-size:13px">${pct}% du cours total</div>`;
+  document.getElementById('mc-card').style.background=mod.bg;
+  document.getElementById('mc-card').style.border=`2px solid ${mod.color}40`;
+  document.getElementById('mc-badges').innerHTML=badges.map(b=>`<span style="font-size:28px;margin:0 6px">${b.icon}</span>`).join('');
+  document.getElementById('mc-btn').style.background=mod.color;
+  show('modcomplete');
+}
+
+renderHome();
+</script>
+</body>
+</html>
